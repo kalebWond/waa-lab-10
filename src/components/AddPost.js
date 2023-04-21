@@ -1,7 +1,12 @@
-import React, { useRef, useState } from 'react'
+import axios from 'axios';
+import React, { useRef } from 'react'
+import { useNavigate } from 'react-router-dom';
 
-function AddPost({ onAddPost }) {
+function AddPost() {
+    const BASE_URL = "http://localhost:8080/api/v1"
+
     const formRef = useRef(null);
+    const navigate = useNavigate();
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -11,8 +16,10 @@ function AddPost({ onAddPost }) {
             author: form["author"].value,
             content: form["content"].value
         }
-        onAddPost(body)
-        form.reset();   
+        axios.post(`${BASE_URL}/posts`, body)
+            .then(res => navigate('/posts'))
+            .catch(err => console.log(err))
+        form.reset();
     }
     return (
         <form ref={formRef} className="mt-8 flex flex-col items-end">

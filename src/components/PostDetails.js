@@ -1,22 +1,32 @@
 import axios from 'axios';
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Comments from './Comments';
-import SelectedIdContext from '../context/SelectedIdContext';
+import { useNavigate, useParams } from 'react-router-dom';
 
-function PostDetails({ onDelete }) {
+function PostDetails() {
     const BASE_URL = "http://localhost:8080/api/v1";
     const [post, setPost] = useState({})
-    const { selectedPost } = useContext(SelectedIdContext);
+    const navigate = useNavigate();
+    const { id } = useParams();
 
     useEffect(() => {
-        axios.get(`${BASE_URL}/posts/${selectedPost}`)
+        axios.get(`${BASE_URL}/posts/${id}`)
             .then(res => setPost(res.data))
             .catch(err => console.log(err))
         //eslint-disable-next-line
-    }, [onDelete])
+    }, [])
+
+    
+  const onDeleteHandler = (id) => {
+    axios.delete(`${BASE_URL}/posts/${id}`)
+      .then(() => {
+        navigate("/posts", {replace: true})
+      })
+      .catch(err => console.log(err))
+  }
 
     //eslint-disable-next-line
-    const memoizedComments = useMemo(() => post.comments, [selectedPost])
+    const memoizedComments = useMemo(() => post.comments, [id])
 
     if (!post.id) return null;
     return (
@@ -27,7 +37,7 @@ function PostDetails({ onDelete }) {
             {memoizedComments && <Comments comments={memoizedComments} />}
             <div className="flex self-center text-lg">
                 <button className="mr-3 text-cyan-600">Edit</button>
-                <button onClick={() => onDelete(post.id)} className="rounded-md px-2 py-1 text-red-600 hover:bg-red-100">Delete</button>
+                <button onClick={() => onDeleteHandler(post.id)} className="rounded-md px-2 py-1 text-red-600 hover:bg-red-100">Delete</button>
             </div>
         </div>
     )
